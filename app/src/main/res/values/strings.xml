@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PromptBooks</string>
+    <string name="chat_hint">Enter purchase or sale&#8230;</string>
+</resources>

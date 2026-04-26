@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Palette -->
+    <color name="primary_blue">#3484A9</color>
+    <color name="primary_dark_blue">#286683</color>
+    <color name="accent_blue">#EBF3F6</color>
+
+    <!-- Neutrals -->
+    <color name="background_light">#F8F9FA</color>
+    <color name="surface_white">#FFFFFF</color>
+    <color name="text_primary">#202124</color>
+    <color name="text_secondary">#5F6368</color>
+    <color name="divider_gray">#DADCE0</color>
+
+    <!-- Chat Specific -->
+    <color name="bubble_user">#3484A9</color>
+    <color name="bubble_bot">#F1F3F4</color>
+    <color name="text_on_user">#FFFFFF</color>
+    <color name="text_on_bot">#202124</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="income_green">#2E7D32</color>
+    <color name="expense_red">#C62828</color>
+</resources>
