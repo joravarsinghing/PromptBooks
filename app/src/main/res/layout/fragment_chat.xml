@@ -103,7 +103,8 @@
         android:layout_alignParentBottom="true"
         android:orientation="vertical"
         android:background="@color/surface_white"
-        android:elevation="8dp">
+        android:elevation="8dp"
+        android:paddingBottom="8dp">
 
         <View
             android:layout_width="match_parent"
@@ -125,6 +126,9 @@
                 android:layout_height="36dp"
                 android:padding="6dp"
                 android:src="@drawable/ic_plus"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
                 app:tint="@color/primary_blue" />
 
             <LinearLayout
@@ -132,7 +136,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginHorizontal="8dp"
-                android:background="@drawable/bg_input_bar"
+                android:background="@drawable/bg_input_field"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="4dp">
 
@@ -153,10 +157,14 @@
                 android:id="@+id/sendIcon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:alpha="1.0"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
                 android:padding="8dp"
-                android:src="@android:drawable/ic_menu_send"
+                android:src="@drawable/send_icon"
                 android:visibility="gone"
-                app:tint="@color/primary_blue" />
+                app:tint="@color/primary_dark_blue" />
 
             <ImageView
                 android:id="@+id/micIcon"
@@ -164,6 +172,9 @@
                 android:layout_height="40dp"
                 android:padding="8dp"
                 android:src="@android:drawable/ic_btn_speak_now"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
                 app:tint="@color/primary_blue" />
         </LinearLayout>
     </LinearLayout>

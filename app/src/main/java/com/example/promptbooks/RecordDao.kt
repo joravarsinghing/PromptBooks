@@ -19,4 +19,9 @@ interface RecordDao {
     @Query("DELETE FROM records WHERE description LIKE '%' || :keyword || '%'")
     suspend fun deleteByDescription(keyword: String)
 
+    @Query("DELETE FROM records WHERE id = :id")
+    suspend fun deleteById(id: Int)
+
+    @Query("DELETE FROM records")
+    suspend fun deleteAll()
 }

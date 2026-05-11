@@ -2,8 +2,8 @@
 <resources>
     <!-- Primary Palette -->
     <color name="primary_blue">#3484A9</color>
-    <color name="primary_dark_blue">#286683</color>
-    <color name="accent_blue">#EBF3F6</color>
+    <color name="primary_dark_blue">#3484A9</color>
+    <color name="accent_blue">#F1F3F4</color>
 
     <!-- Neutrals -->
     <color name="background_light">#F8F9FA</color>

@@ -26,6 +26,7 @@ class ChatFragment : Fragment() {
     private lateinit var micIcon: ImageView
     private lateinit var chatContainer: LinearLayout
     private lateinit var chatScroll: ScrollView
+    private lateinit var uploadIcon: ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,14 +38,22 @@ class ChatFragment : Fragment() {
         chatInput = view.findViewById(R.id.chatInput)
         sendIcon = view.findViewById(R.id.sendIcon)
         micIcon = view.findViewById(R.id.micIcon)
+        uploadIcon = view.findViewById(R.id.uploadIcon)
         chatContainer = view.findViewById(R.id.chatContainer)
         chatScroll = view.findViewById(R.id.chatScroll)
 
         chatInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val inputText = s.toString().trim()
-                sendIcon.visibility = if (inputText.isEmpty()) View.GONE else View.VISIBLE
-                micIcon.visibility = if (inputText.isEmpty()) View.VISIBLE else View.GONE
+                if (inputText.isEmpty()) {
+                    sendIcon.visibility = View.GONE
+                    micIcon.visibility = View.VISIBLE
+                } else {
+                    sendIcon.visibility = View.VISIBLE
+                    sendIcon.alpha = 1f
+                    sendIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.primary_blue))
+                    micIcon.visibility = View.GONE
+                }
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -60,7 +69,30 @@ class ChatFragment : Fragment() {
             }
         }
 
+        micIcon.setOnClickListener {
+            showFeatureNotSupportedDialog("Voice input is not supported in this build.")
+        }
+
+        uploadIcon.setOnClickListener {
+            showFeatureNotSupportedDialog("Attachments are not supported in this build.")
+        }
+
         return view
+    }
+
+    fun clearChatSession() {
+        chatContainer.removeAllViews()
+        view?.findViewById<LinearLayout>(R.id.chatIntro)?.visibility = View.VISIBLE
+    }
+
+    private fun showFeatureNotSupportedDialog(message: String) {
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Feature not supported")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+        
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
     }
 
     suspend fun buildExpenseSummary(): String {
@@ -287,8 +319,6 @@ class ChatFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            val summaryMessage = buildExpenseSummary()
-
             val retrofit = Retrofit.Builder()
                 .baseUrl("https://openrouter.ai/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -333,9 +363,10 @@ class ChatFragment : Fragment() {
                             if (validateTransaction(normalized)) {
                                 // Save to DB
                                 val amount = normalized.amount!!
+                                val fullDateTime = SimpleDateFormat("dd MMM yyyy, h:mm a", Locale.getDefault()).format(Date())
                                 val record = Record(
                                     id = 0,
-                                    date = normalized.date ?: SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
+                                    date = fullDateTime,
                                     account = if (normalized.intent == "income" || normalized.intent == "sale") "Income" else "Expenses",
                                     description = "${normalized.intent.replaceFirstChar { it.uppercase() }}: ${normalized.item ?: "General"}",
                                     amount = if (normalized.intent == "income" || normalized.intent == "sale") -amount else amount
