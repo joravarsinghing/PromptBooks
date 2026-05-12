@@ -1,5 +1,5 @@
 [![Build Status](https://img.shields.io/badge/build-mvp--stable-brightgreen)](./)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.md)
 [![Latest Release](https://img.shields.io/badge/release-v1.00.00-blue)](https://github.com/joravarsinghing/PromptBooks/releases/tag/v1.00.00)
 
 # PromptBooks
@@ -130,5 +130,5 @@ Deliberately out of scope for this MVP:
 
 ## License
 
-This project is licensed under the **MIT License**. See [LICENSE](./LICENSE) for details.
+This project is licensed under the **MIT License**. See [LICENSE](./LICENSE.md) for details.
 
