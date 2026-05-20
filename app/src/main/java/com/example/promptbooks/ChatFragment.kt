@@ -91,7 +91,7 @@ class ChatFragment : Fragment() {
             .setMessage(message)
             .setPositiveButton("OK", null)
             .show()
-        
+
         dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
     }
 
@@ -186,89 +186,53 @@ class ChatFragment : Fragment() {
         }
     }
 
-    private fun normalizeTransactionResponse(
-        raw: AiTransactionResponse,
-        userPrompt: String
-    ): AiTransactionResponse {
-        fun cleanStr(s: String?): String? {
-            val trimmed = s?.trim() ?: return null
-            if (trimmed.isEmpty()) return null
-            val lowers = trimmed.lowercase()
-            if (lowers == "unknown" || lowers == "null" || lowers == "n/a" || lowers == "-") return null
-            return trimmed
-        }
-
-        val intent = cleanStr(raw.intent)?.lowercase() ?: "unknown"
-        val item = cleanStr(raw.item)
-        val quantity = raw.quantity
-        val amount = raw.amount
-
-        // Payment mode rule: only if in original user message
-        val promptLowers = userPrompt.lowercase()
-        val paymentMode = when {
-            promptLowers.contains("cash") -> "cash"
-            promptLowers.contains("bank") -> "bank"
-            promptLowers.contains("credit") -> "credit"
-            else -> null
-        }
-
-        val counterparty = cleanStr(raw.counterparty)
-        val date = cleanStr(raw.date) ?: SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-
-        return AiTransactionResponse(
-            intent = intent,
-            item = item,
-            quantity = quantity,
-            amount = amount,
-            payment_mode = paymentMode,
-            counterparty = counterparty,
-            date = date
-        )
+    private fun cleanStr(s: String?): String? {
+        val trimmed = s?.trim() ?: return null
+        if (trimmed.isEmpty()) return null
+        val lower = trimmed.lowercase()
+        if (lower == "unknown" || lower == "null" || lower == "n/a" || lower == "-") return null
+        return trimmed
     }
 
     private fun validateTransaction(res: AiTransactionResponse): Boolean {
-        if (res.intent == "unknown") return false
+        val type = cleanStr(res.type)?.lowercase()
+        if (type == null || type == "unknown") return false
         if (res.amount == null || res.amount <= 0.0) return false
         return true
     }
 
     private fun buildConfirmationMessage(res: AiTransactionResponse): String {
         val amountStr = formatNumber(res.amount)
-        val qtyStr = formatNumber(res.quantity)
-        val item = res.item?.trim()
-        val counterparty = res.counterparty?.trim()
-        val mode = if (!res.payment_mode.isNullOrBlank()) " (${res.payment_mode.trim()})" else ""
+        val currency = res.currency ?: "AED"
+        val description = cleanStr(res.description) ?: cleanStr(res.type) ?: "transaction"
+        val counterparty = cleanStr(res.counterpartyName)
+        val mode = if (!res.paymentMode.isNullOrBlank()) " via ${res.paymentMode.trim()}" else ""
 
-        return when (res.intent) {
+        return when (res.type?.lowercase()) {
             "purchase" -> {
-                val sb = StringBuilder("Saved purchase: ")
-                if (qtyStr.isNotEmpty()) sb.append("$qtyStr ")
-                sb.append("${item ?: "items"} for $amountStr DHS")
+                val sb = StringBuilder("Saved purchase: $description for $amountStr $currency")
                 if (!counterparty.isNullOrBlank()) sb.append(" from $counterparty")
-                sb.append(".")
+                sb.append(mode).append(".")
                 sb.toString()
             }
             "sale" -> {
-                val sb = StringBuilder("Saved sale: ")
-                if (qtyStr.isNotEmpty()) sb.append("$qtyStr ")
-                sb.append("${item ?: "items"} for $amountStr DHS")
+                val sb = StringBuilder("Saved sale: $description for $amountStr $currency")
                 if (!counterparty.isNullOrBlank()) sb.append(" to $counterparty")
                 sb.append(mode).append(".")
                 sb.toString()
             }
             "expense" -> {
-                val sb = StringBuilder("Saved expense: $amountStr DHS")
-                if (!item.isNullOrBlank()) sb.append(" for $item")
-                sb.append(".")
+                val sb = StringBuilder("Saved expense: $amountStr $currency for $description")
+                sb.append(mode).append(".")
                 sb.toString()
             }
             "income" -> {
-                val sb = StringBuilder("Saved income: $amountStr DHS")
+                val sb = StringBuilder("Saved income: $amountStr $currency")
                 if (!counterparty.isNullOrBlank()) sb.append(" from $counterparty")
                 sb.append(mode).append(".")
                 sb.toString()
             }
-            else -> "Saved transaction: $amountStr DHS."
+            else -> "Saved transaction: $amountStr $currency."
         }
     }
 
@@ -312,7 +276,6 @@ class ChatFragment : Fragment() {
             return
         }
 
-        // AI Guardrail: stop vague inputs early
         if (!isInputReadyForAi(userPrompt)) {
             addMessage("PromptBooks: I need a bit more detail. Please include the amount and whether it was a purchase, sale, expense, or income.")
             return
@@ -331,17 +294,46 @@ class ChatFragment : Fragment() {
                 return@launch
             }
 
+            val systemPrompt = """
+You are a bookkeeping data extraction assistant. Return ONLY a valid JSON object — no explanation, no markdown.
+Extract all fields that are explicitly stated or strongly implied. Leave every other field as null.
+Do NOT guess or invent data.
+
+Return this exact JSON structure:
+{
+  "type": "<income|expense|sale|purchase or null>",
+  "amount": <number or null>,
+  "currency": "<currency code, default AED if not specified>",
+  "description": "<brief description of what was bought/sold/paid or null>",
+  "counterpartyName": "<full name of person or company or null>",
+  "counterpartyType": "<Customer|Supplier|Employee|Other or null>",
+  "paymentMode": "<cash|bank|credit|cheque or null>",
+  "account": "<account name or null>",
+  "isPaid": <true|false or null>,
+  "referenceNumber": "<invoice or ref number or null>",
+  "vatApplicable": <true|false or null>,
+  "vatRate": <number percentage or null>,
+  "vatAmount": <number or null>,
+  "taxCode": "<tax code or null>",
+  "date": "<YYYY-MM-DD if mentioned, else null>",
+  "location": "<place or city mentioned or null>",
+  "notes": "<any extra context or null>",
+  "attachmentUri": null,
+  "attachmentType": null
+}
+            """.trimIndent()
+
             val request = GPTRequest(
                 model = "meta-llama/llama-3-8b-instruct",
                 messages = listOf(
-                    Message("system", "You are a data extraction bot. Return ONLY valid JSON. No sentences, no explanation. Use keys: intent, item, quantity, amount, payment_mode, counterparty. If a value is unknown, use null. Possible intents: 'purchase', 'sale', 'expense', 'income', 'unknown'."),
+                    Message("system", systemPrompt),
                     Message("user", userPrompt)
                 ),
                 stream = false
             )
 
             val authHeader = "Bearer ${BuildConfig.OPENROUTER_API_KEY}"
-            android.util.Log.d("ChatFragment", "Sending OpenRouter request. Key present: ${BuildConfig.OPENROUTER_API_KEY.isNotBlank()}")
+            android.util.Log.d("ChatFragment", "Sending OpenRouter request")
             val call = service.sendPrompt(authHeader, request)
 
             call.enqueue(object : Callback<GPTResponse> {
@@ -356,20 +348,44 @@ class ChatFragment : Fragment() {
                         try {
                             android.util.Log.d("ChatFragment", "AI JSON response: $botReply")
                             val gson = Gson()
-                            val aiResponseRaw = gson.fromJson(botReply, AiTransactionResponse::class.java)
+                            val aiResponse = gson.fromJson(botReply, AiTransactionResponse::class.java)
 
-                            val normalized = normalizeTransactionResponse(aiResponseRaw, userPrompt)
-
-                            if (validateTransaction(normalized)) {
-                                // Save to DB
-                                val amount = normalized.amount!!
+                            if (validateTransaction(aiResponse)) {
+                                val amount = aiResponse.amount!!
+                                val type = cleanStr(aiResponse.type)?.lowercase() ?: "expense"
+                                val isIncome = type == "income" || type == "sale"
                                 val fullDateTime = SimpleDateFormat("dd MMM yyyy, h:mm a", Locale.getDefault()).format(Date())
+                                val nowIso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
+
+                                val description = cleanStr(aiResponse.description)
+                                    ?: cleanStr(aiResponse.type)?.replaceFirstChar { it.uppercase() }
+                                    ?: "General"
+
                                 val record = Record(
                                     id = 0,
-                                    date = fullDateTime,
-                                    account = if (normalized.intent == "income" || normalized.intent == "sale") "Income" else "Expenses",
-                                    description = "${normalized.intent.replaceFirstChar { it.uppercase() }}: ${normalized.item ?: "General"}",
-                                    amount = if (normalized.intent == "income" || normalized.intent == "sale") -amount else amount
+                                    date = if (!aiResponse.date.isNullOrBlank()) aiResponse.date else fullDateTime,
+                                    account = cleanStr(aiResponse.account)
+                                        ?: if (isIncome) "Income" else "Expenses",
+                                    description = "${type.replaceFirstChar { it.uppercase() }}: $description",
+                                    amount = if (isIncome) -amount else amount,
+                                    type = type,
+                                    currency = cleanStr(aiResponse.currency) ?: "AED",
+                                    counterpartyName = cleanStr(aiResponse.counterpartyName),
+                                    counterpartyType = cleanStr(aiResponse.counterpartyType),
+                                    paymentMode = cleanStr(aiResponse.paymentMode),
+                                    isPaid = aiResponse.isPaid ?: false,
+                                    referenceNumber = cleanStr(aiResponse.referenceNumber),
+                                    vatApplicable = aiResponse.vatApplicable ?: false,
+                                    vatRate = aiResponse.vatRate,
+                                    vatAmount = aiResponse.vatAmount,
+                                    taxCode = cleanStr(aiResponse.taxCode),
+                                    createdAt = nowIso,
+                                    updatedAt = nowIso,
+                                    source = "AI",
+                                    location = cleanStr(aiResponse.location),
+                                    notes = cleanStr(aiResponse.notes),
+                                    attachmentUri = null,
+                                    attachmentType = null
                                 )
 
                                 lifecycleScope.launch {
@@ -377,9 +393,7 @@ class ChatFragment : Fragment() {
                                     db.recordDao().insertRecord(record)
                                 }
 
-                                // Show App-Generated Message
-                                val displayMsg = buildConfirmationMessage(normalized)
-                                addMessage("PromptBooks: $displayMsg")
+                                addMessage("PromptBooks: ${buildConfirmationMessage(aiResponse)}")
                             } else {
                                 addMessage("PromptBooks: I need a bit more detail. Please include the amount and whether it was a purchase, sale, expense, or income.")
                             }

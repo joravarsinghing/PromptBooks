@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Your existing theme -->
+    </style>
+    
+    <!-- Rounded spinner style -->
+    <style name="RoundedSpinner" parent="Widget.AppCompat.Spinner">
+        <item name="android:background">@drawable/bg_rounded_spinner</item>
+        <item name="android:padding">12dp</item>
+    </style>
+    
+    <!-- Rounded dropdown popup style -->
+    <style name="RoundedDropdownPopup" parent="Theme.AppCompat.Light">
+        <item name="android:windowBackground">@drawable/bg_rounded_dropdown</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:listViewStyle">@style/RoundedListView</item>
+    </style>
+    
+    <style name="RoundedListView" parent="Widget.AppCompat.ListView">
+        <item name="android:background">@drawable/bg_rounded_dropdown</item>
+        <item name="android:divider">@null</item>
+        <item name="android:dividerHeight">0dp</item>
+    </style>
+    
+    <style name="CustomEditText" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/bg_rounded_spinner</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textColorHint">#BDBDBD</item>
+    </style>
+</resources>

@@ -3,12 +3,16 @@ package com.example.promptbooks
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface RecordDao {
 
     @Insert
     suspend fun insertRecord(record: Record)
+
+    @Update
+    suspend fun updateRecord(record: Record)
 
     @Query("SELECT * FROM records ORDER BY id DESC")
     suspend fun getAllRecords(): List<Record>
