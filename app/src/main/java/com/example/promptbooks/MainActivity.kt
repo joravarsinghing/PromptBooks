@@ -38,11 +38,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         WindowCompat.setDecorFitsSystemWindows(window, true)
         setContentView(R.layout.activity_main)
 
         @Suppress("DEPRECATION")
-        window.statusBarColor = ContextCompat.getColor(this, R.color.background_light)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.surface_white)
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
 
         titleText = findViewById(R.id.title)
@@ -53,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         btnChat.post {
             chatWidth = btnChat.width
             dashboardWidth = btnDashboard.width
-            
+
             val params = selector.layoutParams
             params.width = chatWidth
             selector.layoutParams = params

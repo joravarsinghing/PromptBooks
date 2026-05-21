@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -177,22 +176,9 @@ class DashboardFragment : Fragment() {
             setPadding(0, 0, 16, 0)
         }
 
-        val moreBtn = ImageView(context).apply {
-            setImageResource(R.drawable.ic_more_vert)
-            val size = (32 * density).toInt()
-            layoutParams = LinearLayout.LayoutParams(size, size)
-            setPadding(4, 4, 4, 4)
-            background = ContextCompat.getDrawable(context, R.drawable.bg_ripple_borderless)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Options"
-            setOnClickListener { view -> showRowMenu(view, record) }
-        }
-
         row.addView(indicator)
         row.addView(infoLayout)
         row.addView(amountText)
-        row.addView(moreBtn)
 
         containerTransactions.addView(row)
 
@@ -206,183 +192,176 @@ class DashboardFragment : Fragment() {
         containerTransactions.addView(divider)
     }
 
-    private fun showRowMenu(view: View, record: Record) {
-        val popup = PopupMenu(requireContext(), view)
-        popup.menu.add("Delete")
-        popup.setOnMenuItemClickListener {
-            showDeleteConfirmation(record)
-            true
-        }
-        popup.show()
-    }
+    private fun showTransactionDetail(record: Record) {
+        val ctx = requireContext()
+        val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_transaction_detail, null)
 
-    private fun showDeleteConfirmation(record: Record) {
-        val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Delete transaction?")
-            .setMessage("This transaction will be removed.")
-            .setPositiveButton("Delete") { _, _ ->
-                lifecycleScope.launch {
-                    AppDatabase.getDatabase(requireContext()).recordDao().deleteById(record.id)
-                    loadDashboardData()
-                }
+        val spinnerType = dialogView.findViewById<Spinner>(R.id.spinnerType)
+        val etAmount = dialogView.findViewById<EditText>(R.id.etAmount)
+        val etCurrency = dialogView.findViewById<EditText>(R.id.etCurrency)
+        val etDescription = dialogView.findViewById<EditText>(R.id.etDescription)
+        val etCounterpartyName = dialogView.findViewById<EditText>(R.id.etCounterpartyName)
+        val spinnerCounterpartyType = dialogView.findViewById<Spinner>(R.id.spinnerCounterpartyType)
+        val spinnerPaymentMode = dialogView.findViewById<Spinner>(R.id.spinnerPaymentMode)
+        val etAccount = dialogView.findViewById<EditText>(R.id.etAccount)
+        val switchIsPaid = dialogView.findViewById<Switch>(R.id.switchIsPaid)
+        val etReferenceNumber = dialogView.findViewById<EditText>(R.id.etReferenceNumber)
+        val switchVatApplicable = dialogView.findViewById<Switch>(R.id.switchVatApplicable)
+        val etVatRate = dialogView.findViewById<EditText>(R.id.etVatRate)
+        val etVatAmount = dialogView.findViewById<EditText>(R.id.etVatAmount)
+        val etTaxCode = dialogView.findViewById<EditText>(R.id.etTaxCode)
+        val etDate = dialogView.findViewById<EditText>(R.id.etDate)
+        val etLocation = dialogView.findViewById<EditText>(R.id.etLocation)
+        val etNotes = dialogView.findViewById<EditText>(R.id.etNotes)
+        val etAttachmentUri = dialogView.findViewById<EditText>(R.id.etAttachmentUri)
+
+        val btnDelete = dialogView.findViewById<Button>(R.id.btnDelete)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+        val btnSave = dialogView.findViewById<Button>(R.id.btnSave)
+
+        // Spinner data
+        val typeOptions = listOf("", "income", "expense", "sale", "purchase")
+        val counterpartyTypeOptions = listOf("", "Customer", "Supplier", "Employee", "Other")
+        val paymentModeOptions = listOf("", "cash", "bank", "credit", "cheque")
+
+        // Create custom spinner adapter that shows a dropdown arrow
+        class ArrowSpinnerAdapter(items: List<String>) : ArrayAdapter<String>(ctx, android.R.layout.simple_spinner_item, items) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.setPadding(12, 16, 40, 16)  // Extra right padding for arrow
+                view.setTextColor(ContextCompat.getColor(ctx, R.color.text_primary))
+                view.textSize = 14f
+                
+                // Add chevron arrow
+                val arrow = ContextCompat.getDrawable(ctx, R.drawable.ic_chevron_down)
+                arrow?.setBounds(0, 0, arrow.intrinsicWidth, arrow.intrinsicHeight)
+                view.setCompoundDrawablesWithIntrinsicBounds(null, null, arrow, null)
+                view.compoundDrawablePadding = 8
+                
+                // Capitalize text
+                val originalText = getItem(position) ?: ""
+                view.text = originalText.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                return view
             }
-            .setNegativeButton("Cancel", null)
-            .show()
-        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
-    }
-
-private fun showTransactionDetail(record: Record) {
-    val ctx = requireContext()
-    val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_transaction_detail, null)
-
-    val spinnerType = dialogView.findViewById<Spinner>(R.id.spinnerType)
-    val etAmount = dialogView.findViewById<EditText>(R.id.etAmount)
-    val etCurrency = dialogView.findViewById<EditText>(R.id.etCurrency)
-    val etDescription = dialogView.findViewById<EditText>(R.id.etDescription)
-    val etCounterpartyName = dialogView.findViewById<EditText>(R.id.etCounterpartyName)
-    val spinnerCounterpartyType = dialogView.findViewById<Spinner>(R.id.spinnerCounterpartyType)
-    val spinnerPaymentMode = dialogView.findViewById<Spinner>(R.id.spinnerPaymentMode)
-    val etAccount = dialogView.findViewById<EditText>(R.id.etAccount)
-    val switchIsPaid = dialogView.findViewById<Switch>(R.id.switchIsPaid)
-    val etReferenceNumber = dialogView.findViewById<EditText>(R.id.etReferenceNumber)
-    val switchVatApplicable = dialogView.findViewById<Switch>(R.id.switchVatApplicable)
-    val etVatRate = dialogView.findViewById<EditText>(R.id.etVatRate)
-    val etVatAmount = dialogView.findViewById<EditText>(R.id.etVatAmount)
-    val etTaxCode = dialogView.findViewById<EditText>(R.id.etTaxCode)
-    val etDate = dialogView.findViewById<EditText>(R.id.etDate)
-    val etLocation = dialogView.findViewById<EditText>(R.id.etLocation)
-    val etNotes = dialogView.findViewById<EditText>(R.id.etNotes)
-    val etAttachmentUri = dialogView.findViewById<EditText>(R.id.etAttachmentUri)
-
-    // Spinner data
-    val typeOptions = listOf("", "income", "expense", "sale", "purchase")
-    val counterpartyTypeOptions = listOf("", "Customer", "Supplier", "Employee", "Other")
-    val paymentModeOptions = listOf("", "cash", "bank", "credit", "cheque")
-
-    // Create custom spinner adapter that shows a dropdown arrow
-    class ArrowSpinnerAdapter(items: List<String>) : ArrayAdapter<String>(ctx, android.R.layout.simple_spinner_item, items) {
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = super.getView(position, convertView, parent) as TextView
-            view.setPadding(12, 16, 40, 16)  // Extra right padding for arrow
-            view.setTextColor(ContextCompat.getColor(ctx, R.color.text_primary))
-            view.textSize = 14f
             
-            // Add chevron arrow
-            val arrow = ContextCompat.getDrawable(ctx, R.drawable.ic_chevron_down)
-            arrow?.setBounds(0, 0, arrow.intrinsicWidth, arrow.intrinsicHeight)
-            view.setCompoundDrawablesWithIntrinsicBounds(null, null, arrow, null)
-            view.compoundDrawablePadding = 8
-            
-            // Capitalize text
-            val originalText = getItem(position) ?: ""
-            view.text = originalText.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-            return view
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getDropDownView(position, convertView, parent) as TextView
+                view.setPadding(16, 16, 16, 16)
+                view.setTextColor(ContextCompat.getColor(ctx, R.color.text_primary))
+                view.textSize = 14f
+                
+                // Capitalize text
+                val originalText = getItem(position) ?: ""
+                view.text = originalText.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                return view
+            }
         }
+
+        // Apply to all three spinners
+        spinnerType.adapter = ArrowSpinnerAdapter(typeOptions)
+        spinnerType.setPopupBackgroundResource(R.drawable.bg_rounded_dropdown)
+
+        spinnerCounterpartyType.adapter = ArrowSpinnerAdapter(counterpartyTypeOptions)
+        spinnerCounterpartyType.setPopupBackgroundResource(R.drawable.bg_rounded_dropdown)
+
+        spinnerPaymentMode.adapter = ArrowSpinnerAdapter(paymentModeOptions)
+        spinnerPaymentMode.setPopupBackgroundResource(R.drawable.bg_rounded_dropdown)
         
-        override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = super.getDropDownView(position, convertView, parent) as TextView
-            view.setPadding(16, 16, 16, 16)
-            view.setTextColor(ContextCompat.getColor(ctx, R.color.text_primary))
-            view.textSize = 14f
-            
-            // Capitalize text
-            val originalText = getItem(position) ?: ""
-            view.text = originalText.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-            return view
+        // Pre-fill fields
+        spinnerType.setSelection(typeOptions.indexOfFirst { it.equals(record.type, ignoreCase = true) }.coerceAtLeast(0))
+        val displayAmount = if (record.amount < 0) -record.amount else record.amount
+        etAmount.setText(formatNumber(displayAmount))
+        etCurrency.setText(record.currency ?: "AED")
+        etDescription.setText(record.description)
+        etCounterpartyName.setText(record.counterpartyName ?: "")
+        spinnerCounterpartyType.setSelection(counterpartyTypeOptions.indexOfFirst { it.equals(record.counterpartyType, ignoreCase = true) }.coerceAtLeast(0))
+        spinnerPaymentMode.setSelection(paymentModeOptions.indexOfFirst { it.equals(record.paymentMode, ignoreCase = true) }.coerceAtLeast(0))
+        etAccount.setText(record.account)
+        switchIsPaid.isChecked = record.isPaid
+        etReferenceNumber.setText(record.referenceNumber ?: "")
+        switchVatApplicable.isChecked = record.vatApplicable
+        etVatRate.setText(if (record.vatRate != null) formatNumber(record.vatRate) else "")
+        etVatAmount.setText(if (record.vatAmount != null) formatNumber(record.vatAmount) else "")
+        etTaxCode.setText(record.taxCode ?: "")
+        etDate.setText(record.date)
+        etLocation.setText(record.location ?: "")
+        etNotes.setText(record.notes ?: "")
+        etAttachmentUri.setText(record.attachmentUri ?: "")
+
+        val dialog = AlertDialog.Builder(ctx)
+            .setView(dialogView)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
+        dialog.show()
+
+        btnDelete.setOnClickListener {
+            AlertDialog.Builder(ctx)
+                .setTitle("Delete transaction?")
+                .setMessage("Delete this transaction? Cannot undo.")
+                .setPositiveButton("Delete") { _, _ ->
+                    lifecycleScope.launch {
+                        AppDatabase.getDatabase(ctx).recordDao().deleteById(record.id)
+                        loadDashboardData()
+                        dialog.dismiss()
+                        Toast.makeText(ctx, "Transaction deleted", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+                .window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnSave.setOnClickListener {
+            val amountText = etAmount.text.toString().trim()
+            val amountValue = amountText.toDoubleOrNull()
+
+            if (amountValue == null || amountValue <= 0.0) {
+                Toast.makeText(ctx, "Amount must be a number greater than 0", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val selectedType = spinnerType.selectedItem?.toString()?.takeIf { it.isNotBlank() }
+            val isIncome = selectedType?.lowercase() == "income" || selectedType?.lowercase() == "sale"
+            val storedAmount = if (isIncome) -amountValue else amountValue
+
+            val nowIso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
+
+            val updated = record.copy(
+                date = etDate.text.toString().trim().takeIf { it.isNotBlank() } ?: record.date,
+                account = etAccount.text.toString().trim().takeIf { it.isNotBlank() } ?: record.account,
+                description = etDescription.text.toString().trim().takeIf { it.isNotBlank() } ?: record.description,
+                amount = storedAmount,
+                type = selectedType,
+                currency = etCurrency.text.toString().trim().takeIf { it.isNotBlank() } ?: "AED",
+                counterpartyName = etCounterpartyName.text.toString().trim().takeIf { it.isNotBlank() },
+                counterpartyType = spinnerCounterpartyType.selectedItem?.toString()?.takeIf { it.isNotBlank() },
+                paymentMode = spinnerPaymentMode.selectedItem?.toString()?.takeIf { it.isNotBlank() },
+                isPaid = switchIsPaid.isChecked,
+                referenceNumber = etReferenceNumber.text.toString().trim().takeIf { it.isNotBlank() },
+                vatApplicable = switchVatApplicable.isChecked,
+                vatRate = etVatRate.text.toString().trim().toDoubleOrNull(),
+                vatAmount = etVatAmount.text.toString().trim().toDoubleOrNull(),
+                taxCode = etTaxCode.text.toString().trim().takeIf { it.isNotBlank() },
+                location = etLocation.text.toString().trim().takeIf { it.isNotBlank() },
+                notes = etNotes.text.toString().trim().takeIf { it.isNotBlank() },
+                attachmentUri = etAttachmentUri.text.toString().trim().takeIf { it.isNotBlank() },
+                updatedAt = nowIso
+            )
+
+            lifecycleScope.launch {
+                AppDatabase.getDatabase(ctx).recordDao().updateRecord(updated)
+                loadDashboardData()
+                Toast.makeText(ctx, "Transaction updated", Toast.LENGTH_SHORT).show()
+            }
+
+            dialog.dismiss()
         }
     }
-
-    // Apply to all three spinners
-    spinnerType.adapter = ArrowSpinnerAdapter(typeOptions)
-    spinnerType.setPopupBackgroundResource(R.drawable.bg_rounded_dropdown)
-
-    spinnerCounterpartyType.adapter = ArrowSpinnerAdapter(counterpartyTypeOptions)
-    spinnerCounterpartyType.setPopupBackgroundResource(R.drawable.bg_rounded_dropdown)
-
-    spinnerPaymentMode.adapter = ArrowSpinnerAdapter(paymentModeOptions)
-    spinnerPaymentMode.setPopupBackgroundResource(R.drawable.bg_rounded_dropdown)
-    
-    // Pre-fill fields
-    spinnerType.setSelection(typeOptions.indexOfFirst { it.equals(record.type, ignoreCase = true) }.coerceAtLeast(0))
-    val displayAmount = if (record.amount < 0) -record.amount else record.amount
-    etAmount.setText(formatNumber(displayAmount))
-    etCurrency.setText(record.currency ?: "AED")
-    etDescription.setText(record.description)
-    etCounterpartyName.setText(record.counterpartyName ?: "")
-    spinnerCounterpartyType.setSelection(counterpartyTypeOptions.indexOfFirst { it.equals(record.counterpartyType, ignoreCase = true) }.coerceAtLeast(0))
-    spinnerPaymentMode.setSelection(paymentModeOptions.indexOfFirst { it.equals(record.paymentMode, ignoreCase = true) }.coerceAtLeast(0))
-    etAccount.setText(record.account)
-    switchIsPaid.isChecked = record.isPaid
-    etReferenceNumber.setText(record.referenceNumber ?: "")
-    switchVatApplicable.isChecked = record.vatApplicable
-    etVatRate.setText(if (record.vatRate != null) formatNumber(record.vatRate) else "")
-    etVatAmount.setText(if (record.vatAmount != null) formatNumber(record.vatAmount) else "")
-    etTaxCode.setText(record.taxCode ?: "")
-    etDate.setText(record.date)
-    etLocation.setText(record.location ?: "")
-    etNotes.setText(record.notes ?: "")
-    etAttachmentUri.setText(record.attachmentUri ?: "")
-
-    val dialog = AlertDialog.Builder(ctx)
-        .setTitle("Transaction Details")
-        .setView(dialogView)
-        .setPositiveButton("Save", null)
-        .setNegativeButton("Cancel", null)
-        .create()
-
-    dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
-    dialog.show()
-
-    // Style the buttons
-    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(ctx, R.color.primary_blue))
-    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(ctx, R.color.text_secondary))
-
-    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-        val amountText = etAmount.text.toString().trim()
-        val amountValue = amountText.toDoubleOrNull()
-
-        if (amountValue == null || amountValue <= 0.0) {
-            Toast.makeText(ctx, "Amount must be a number greater than 0", Toast.LENGTH_SHORT).show()
-            return@setOnClickListener
-        }
-
-        val selectedType = spinnerType.selectedItem?.toString()?.takeIf { it.isNotBlank() }
-        val isIncome = selectedType?.lowercase() == "income" || selectedType?.lowercase() == "sale"
-        val storedAmount = if (isIncome) -amountValue else amountValue
-
-        val nowIso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
-
-        val updated = record.copy(
-            date = etDate.text.toString().trim().takeIf { it.isNotBlank() } ?: record.date,
-            account = etAccount.text.toString().trim().takeIf { it.isNotBlank() } ?: record.account,
-            description = etDescription.text.toString().trim().takeIf { it.isNotBlank() } ?: record.description,
-            amount = storedAmount,
-            type = selectedType,
-            currency = etCurrency.text.toString().trim().takeIf { it.isNotBlank() } ?: "AED",
-            counterpartyName = etCounterpartyName.text.toString().trim().takeIf { it.isNotBlank() },
-            counterpartyType = spinnerCounterpartyType.selectedItem?.toString()?.takeIf { it.isNotBlank() },
-            paymentMode = spinnerPaymentMode.selectedItem?.toString()?.takeIf { it.isNotBlank() },
-            isPaid = switchIsPaid.isChecked,
-            referenceNumber = etReferenceNumber.text.toString().trim().takeIf { it.isNotBlank() },
-            vatApplicable = switchVatApplicable.isChecked,
-            vatRate = etVatRate.text.toString().trim().toDoubleOrNull(),
-            vatAmount = etVatAmount.text.toString().trim().toDoubleOrNull(),
-            taxCode = etTaxCode.text.toString().trim().takeIf { it.isNotBlank() },
-            location = etLocation.text.toString().trim().takeIf { it.isNotBlank() },
-            notes = etNotes.text.toString().trim().takeIf { it.isNotBlank() },
-            attachmentUri = etAttachmentUri.text.toString().trim().takeIf { it.isNotBlank() },
-            updatedAt = nowIso
-        )
-
-        lifecycleScope.launch {
-            AppDatabase.getDatabase(ctx).recordDao().updateRecord(updated)
-            loadDashboardData()
-            Toast.makeText(ctx, "Transaction updated", Toast.LENGTH_SHORT).show()
-        }
-
-        dialog.dismiss()
-    }
-}
 
     private fun formatNumber(value: Double): String {
         return if (value == value.toLong().toDouble()) {

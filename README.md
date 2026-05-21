@@ -56,7 +56,7 @@
   - Dashboard shows **Bank Balance**, **Sales**, and **Recent Transactions**.
   - Date/time shown for dashboard rows.
 - **Demo Utilities**
-  - Per-row delete via 3-dot menu.
+  - Per-transaction delete via detail dialog.
   - **Clear Data** for full demo reset.
   - **New Chat** clears visible chat only.
   - **Generate Sample Data** from support popup.
