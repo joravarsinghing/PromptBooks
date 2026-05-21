@@ -98,25 +98,30 @@ class MainActivity : AppCompatActivity() {
     fun getChatFragment(): ChatFragment = chatFragment
 
     private fun showSupportDialog() {
+        val options = arrayOf("Open LinkedIn", "Generate Sample Data", "Clear All Data", "Cancel")
+        
         val dialog = AlertDialog.Builder(this)
             .setTitle("Need help?")
-            .setMessage("Contact Joravar Singh on LinkedIn")
-            .setPositiveButton("Open LinkedIn") { _, _ ->
-                val link = "https://www.linkedin.com/in/joravarsingh/"
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        val link = "https://www.linkedin.com/in/joravarsingh/"
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                            startActivity(intent)
+                        } catch (e: Exception) {
+                            Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    1 -> generateSampleData()
+                    2 -> (dashboardFragment as? DashboardFragment)?.showClearDataConfirmation()
+                    3 -> {} // Cancel
                 }
             }
-            .setNeutralButton("Generate Sample Data") { _, _ ->
-                generateSampleData()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+            .create()
         
         dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
+        dialog.show()
     }
 
     private fun generateSampleData() {

@@ -14,7 +14,7 @@
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <!-- Bank Balance Card -->
+        <!-- Net Profit Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -31,15 +31,21 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bank Balance"
+                    android:text="Net Profit"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:textColor="#5F6368" />
                 <TextView
-                    android:id="@+id/tvBankBalance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0 DHS"
+                    android:text="All time"
+                    android:textSize="10sp"
+                    android:textColor="#999999" />
+                <TextView
+                    android:id="@+id/tvNetProfit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 AED"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="#3484A9"
@@ -69,10 +75,16 @@
                     android:textStyle="bold"
                     android:textColor="#5F6368" />
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="All time"
+                    android:textSize="10sp"
+                    android:textColor="#999999" />
+                <TextView
                     android:id="@+id/tvSales"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0 DHS"
+                    android:text="0 AED"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="#2E7D32"
@@ -80,6 +92,47 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
     </LinearLayout>
+
+    <!-- Bank Balance Trend Chart -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bank Balance Trend"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#202124"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="4dp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@android:color/white">
+
+            <TextView
+                android:id="@+id/tvCurrentBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Current Balance: 0 AED"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#202124"
+                android:layout_marginBottom="8dp" />
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chartBalanceTrend"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:paddingHorizontal="8dp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:layout_width="wrap_content"
@@ -154,18 +207,18 @@
             android:layout_height="match_parent" />
 
         <TextView
-            android:id="@+id/btnClearData"
+            android:id="@+id/btnExportData"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Clear Data"
-            android:textColor="#C62828"
+            android:text="Export Data"
+            android:textColor="@color/primary_blue"
             android:textSize="14sp"
             android:gravity="center"
             android:padding="12dp"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/bg_button_danger" />
+            android:background="@drawable/bg_button_secondary" />
 
     </LinearLayout>
 

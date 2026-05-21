@@ -1,6 +1,8 @@
 package com.example.promptbooks
 
+import android.content.Intent
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -9,20 +11,34 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.google.gson.GsonBuilder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
 class DashboardFragment : Fragment() {
 
-    private lateinit var tvBankBalance: TextView
+    private lateinit var tvNetProfit: TextView
     private lateinit var tvSales: TextView
+    private lateinit var tvCurrentBalance: TextView
+    private lateinit var chartBalanceTrend: LineChart
     private lateinit var containerTransactions: LinearLayout
     private lateinit var tvEmptyState: TextView
     private lateinit var btnNewChat: TextView
-    private lateinit var btnClearData: TextView
+    private lateinit var btnExportData: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,15 +47,17 @@ class DashboardFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
 
-        tvBankBalance = view.findViewById(R.id.tvBankBalance)
+        tvNetProfit = view.findViewById(R.id.tvNetProfit)
         tvSales = view.findViewById(R.id.tvSales)
+        tvCurrentBalance = view.findViewById(R.id.tvCurrentBalance)
+        chartBalanceTrend = view.findViewById(R.id.chartBalanceTrend)
         containerTransactions = view.findViewById(R.id.containerTransactions)
         tvEmptyState = view.findViewById(R.id.tvEmptyState)
         btnNewChat = view.findViewById(R.id.btnNewChat)
-        btnClearData = view.findViewById(R.id.btnClearData)
+        btnExportData = view.findViewById(R.id.btnExportData)
 
         btnNewChat.setOnClickListener { showNewChatConfirmation() }
-        btnClearData.setOnClickListener { showClearDataConfirmation() }
+        btnExportData.setOnClickListener { exportData() }
 
         loadDashboardData()
 
@@ -59,10 +77,10 @@ class DashboardFragment : Fragment() {
         dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
     }
 
-    private fun showClearDataConfirmation() {
+    fun showClearDataConfirmation() {
         val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Clear data?")
-            .setMessage("This will delete all saved transactions.")
+            .setTitle("Clear all transactions?")
+            .setMessage("This will delete all saved transactions. This cannot be undone.")
             .setPositiveButton("Clear") { _, _ ->
                 lifecycleScope.launch {
                     AppDatabase.getDatabase(requireContext()).recordDao().deleteAll()
@@ -73,6 +91,54 @@ class DashboardFragment : Fragment() {
             .setNegativeButton("Cancel", null)
             .show()
         dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded)
+    }
+
+    private fun exportData() {
+        lifecycleScope.launch {
+            val db = AppDatabase.getDatabase(requireContext())
+            val records = db.recordDao().getAllRecords()
+
+            if (records.isEmpty()) {
+                Toast.makeText(context, "No transactions to export", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            try {
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                val fileName = "promptbooks_export_$timestamp.json"
+                
+                val gson = GsonBuilder().setPrettyPrinting().create()
+                val jsonString = gson.toJson(records)
+
+                val exportDir = File(requireContext().cacheDir, "exports")
+                if (!exportDir.exists()) exportDir.mkdirs()
+                
+                val file = File(exportDir, fileName)
+                withContext(Dispatchers.IO) {
+                    FileOutputStream(file).use { 
+                        it.write(jsonString.toByteArray())
+                    }
+                }
+
+                val uri = FileProvider.getUriForFile(
+                    requireContext(),
+                    "${requireContext().packageName}.fileprovider",
+                    file
+                )
+
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/json"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                
+                startActivity(Intent.createChooser(intent, "Export Transactions"))
+                Toast.makeText(context, "Export ready", Toast.LENGTH_SHORT).show()
+
+            } catch (e: Exception) {
+                Toast.makeText(context, "Export failed: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
@@ -92,30 +158,111 @@ class DashboardFragment : Fragment() {
 
             if (records.isEmpty()) {
                 tvEmptyState.visibility = View.VISIBLE
-                tvBankBalance.text = "0 DHS"
-                tvSales.text = "0 DHS"
+                tvNetProfit.text = "0 AED"
+                tvSales.text = "0 AED"
+                tvCurrentBalance.text = "Current Balance: 0 AED"
                 containerTransactions.removeAllViews()
+                chartBalanceTrend.clear()
+                chartBalanceTrend.setNoDataText("No transactions to show")
                 return@launch
             }
 
             tvEmptyState.visibility = View.GONE
 
-            var totalSales = 0.0
-            var bankBalance = 0.0
+            val totalIncome = records.filter { it.amount < 0 }.sumOf { -it.amount }
+            val totalExpense = records.filter { it.amount > 0 }.sumOf { it.amount }
+            val netProfit = totalIncome - totalExpense
+
+            tvSales.text = "${totalIncome.toInt()} AED"
+            tvNetProfit.text = "${netProfit.toInt()} AED"
+            tvNetProfit.setTextColor(ContextCompat.getColor(requireContext(), 
+                if (netProfit >= 0) R.color.income_green else R.color.expense_red))
 
             containerTransactions.removeAllViews()
+            records.forEach { addTransactionRow(it) }
 
-            records.forEach { record ->
-                bankBalance += -record.amount
-                if (record.description.startsWith("Sale:", ignoreCase = true)) {
-                    totalSales += -record.amount
-                }
-                addTransactionRow(record)
-            }
-
-            tvBankBalance.text = "${formatNumber(bankBalance)} DHS"
-            tvSales.text = "${formatNumber(totalSales)} DHS"
+            loadBalanceTrend(records)
         }
+    }
+
+    private fun loadBalanceTrend(records: List<Record>) {
+        if (records.isEmpty()) return
+
+        val sortedRecords = records.sortedBy { parseDate(it.createdAt ?: it.date) }
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dayBalances = mutableMapOf<String, Double>()
+        
+        var runningBalance = 0.0
+        sortedRecords.forEach { record ->
+            runningBalance += -record.amount // amount is negative for income
+            val dateKey = dateFormat.format(parseDate(record.createdAt ?: record.date))
+            dayBalances[dateKey] = runningBalance
+        }
+
+        tvCurrentBalance.text = String.format("Current Balance: %,.0f AED", runningBalance)
+
+        val sortedDates = dayBalances.keys.sorted()
+        val last30Dates = if (sortedDates.size > 30) sortedDates.takeLast(30) else sortedDates
+        
+        val entries = last30Dates.mapIndexed { index, date ->
+            Entry(index.toFloat(), dayBalances[date]?.toFloat() ?: 0f)
+        }
+
+        val dataSet = LineDataSet(entries, "Balance").apply {
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+            setDrawFilled(true)
+            fillColor = ContextCompat.getColor(requireContext(), R.color.primary_blue)
+            color = ContextCompat.getColor(requireContext(), R.color.primary_blue)
+            lineWidth = 2f
+            setDrawValues(false)
+            setDrawCircles(false)
+        }
+
+        chartBalanceTrend.apply {
+            data = LineData(dataSet)
+            description.isEnabled = false
+            legend.isEnabled = false
+            setExtraOffsets(5f, 5f, 5f, 5f)
+            
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                val displayLabels = last30Dates.map { dateStr ->
+                    try {
+                        val date = dateFormat.parse(dateStr)
+                        SimpleDateFormat("dd-MM", Locale.getDefault()).format(date!!)
+                    } catch (e: Exception) { dateStr.substring(5) }
+                }
+                valueFormatter = IndexAxisValueFormatter(displayLabels)
+                setDrawGridLines(false)
+                granularity = 1f
+                setAvoidFirstLastClipping(true)
+                axisMinimum = -0.1f
+                axisMaximum = (entries.size - 1).toFloat() + 0.5f
+            }
+            
+            axisLeft.apply {
+                setDrawGridLines(true)
+                gridColor = ContextCompat.getColor(requireContext(), R.color.divider_gray)
+            }
+            axisRight.isEnabled = false
+            
+            invalidate()
+        }
+    }
+
+    private fun parseDate(dateStr: String?): Date {
+        if (dateStr == null) return Date()
+        val formats = listOf(
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()),
+            SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault()),
+            SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+        )
+        for (format in formats) {
+            try {
+                return format.parse(dateStr) ?: continue
+            } catch (e: Exception) {}
+        }
+        return Date()
     }
 
     private fun addTransactionRow(record: Record) {
