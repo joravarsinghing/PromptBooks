@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light">
+    android:background="@color/background_canvas">
 
     <!-- Centered intro state -->
     <LinearLayout
@@ -14,16 +14,17 @@
         android:orientation="vertical"
         android:gravity="center"
         android:layout_centerInParent="true"
-        android:padding="24dp">
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp">
 
         <ImageView
             android:id="@+id/logoImage"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:src="@drawable/logo"
             android:contentDescription="App Logo"
-            android:alpha="0.8"
-            android:layout_marginBottom="16dp"/>
+            android:alpha="0.85"
+            android:layout_marginBottom="20dp" />
 
         <TextView
             android:id="@+id/chatIntroText"
@@ -31,27 +32,30 @@
             android:layout_height="wrap_content"
             android:text="Your AI Bookkeeping Assistant"
             android:textColor="@color/text_primary"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textStyle="bold"
+            android:letterSpacing="-0.01"
             android:textAlignment="center" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Try saying something like:"
+            android:text="Try saying something like"
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp" />
 
-        <!-- Suggestion Chips (Styled TextViews) -->
+        <!-- Suggestion Chips -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="“Bought 50 notebooks for 250 dhs”"
+            android:text="&quot;Bought 50 notebooks for 250 dhs&quot;"
             android:background="@drawable/bg_suggestion_chip"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:textColor="@color/primary_blue"
             android:textSize="13sp"
             android:layout_marginBottom="8dp" />
@@ -59,10 +63,12 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="“Sold 12 notebooks for 120 dhs cash”"
+            android:text="&quot;Sold 12 notebooks for 120 dhs cash&quot;"
             android:background="@drawable/bg_suggestion_chip"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:textColor="@color/primary_blue"
             android:textSize="13sp"
             android:layout_marginBottom="8dp" />
@@ -70,32 +76,38 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="“Paid 80 dhs for taxi to meet a client”"
+            android:text="&quot;Paid 80 dhs for taxi to meet a client&quot;"
             android:background="@drawable/bg_suggestion_chip"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:textColor="@color/primary_blue"
             android:textSize="13sp" />
     </LinearLayout>
 
+    <!-- Scrollable messages -->
     <ScrollView
         android:id="@+id/chatScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottomBarContainer"
         android:clipToPadding="false"
-        android:paddingBottom="16dp">
+        android:paddingBottom="12dp">
 
         <LinearLayout
             android:id="@+id/chatContainer"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:animateLayoutChanges="true" />
     </ScrollView>
 
-    <!-- Bottom input area -->
+    <!-- Bottom input bar -->
     <LinearLayout
         android:id="@+id/bottomBarContainer"
         android:layout_width="match_parent"
@@ -103,13 +115,13 @@
         android:layout_alignParentBottom="true"
         android:orientation="vertical"
         android:background="@color/surface_white"
-        android:elevation="8dp"
-        android:paddingBottom="8dp">
+        android:paddingBottom="4dp">
 
+        <!-- Hairline divider -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/divider_gray" />
+            android:layout_height="0.5dp"
+            android:background="@color/divider_hairline" />
 
         <LinearLayout
             android:id="@+id/chatBar"
@@ -117,65 +129,74 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp">
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
             <ImageView
                 android:id="@+id/uploadIcon"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:padding="6dp"
+                android:padding="7dp"
                 android:src="@drawable/ic_plus"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                app:tint="@color/primary_blue" />
+                app:tint="@color/text_secondary" />
 
+            <!-- Input pill -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
-                android:background="@drawable/bg_input_field"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp">
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_input_bar"
+                android:paddingStart="14dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:gravity="center_vertical">
 
                 <EditText
                     android:id="@+id/chatInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
-                    android:hint="Type a message..."
+                    android:hint="Message"
                     android:maxLines="4"
                     android:minHeight="40dp"
                     android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_secondary"
+                    android:textColorHint="@color/text_placeholder"
                     android:textSize="15sp" />
             </LinearLayout>
 
+            <!-- Send: filled circle button -->
             <ImageView
                 android:id="@+id/sendIcon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:alpha="1.0"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/bg_send_button"
                 android:clickable="true"
                 android:focusable="true"
-                android:padding="8dp"
+                android:padding="9dp"
                 android:src="@drawable/send_icon"
                 android:visibility="gone"
-                app:tint="@color/primary_dark_blue" />
+                app:tint="@color/white" />
 
+            <!-- Mic: borderless -->
             <ImageView
                 android:id="@+id/micIcon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="8dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="7dp"
                 android:src="@android:drawable/ic_btn_speak_now"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                app:tint="@color/primary_blue" />
+                app:tint="@color/text_secondary" />
         </LinearLayout>
     </LinearLayout>
 

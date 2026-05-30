@@ -4,157 +4,166 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F8F9FA"
-    android:padding="16dp">
+    android:background="@color/background_canvas"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="4dp">
 
-    <!-- Summary Cards -->
+    <!-- Summary Cards Row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:baselineAligned="false">
+        android:baselineAligned="false"
+        android:layout_marginBottom="12dp">
 
         <!-- Net Profit Card -->
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-            <LinearLayout
-                android:layout_width="match_parent"
+            android:layout_marginEnd="6dp"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/bg_card">
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:background="@android:color/white">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Net Profit"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="#5F6368" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="All time"
-                    android:textSize="10sp"
-                    android:textColor="#999999" />
-                <TextView
-                    android:id="@+id/tvNetProfit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 AED"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#3484A9"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                android:text="NET PROFIT"
+                android:textSize="11sp"
+                android:letterSpacing="0.06"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All time"
+                android:textSize="10sp"
+                android:textColor="@color/text_tertiary"
+                android:layout_marginTop="1dp" />
+
+            <TextView
+                android:id="@+id/tvNetProfit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 AED"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:letterSpacing="-0.01"
+                android:textColor="@color/primary_blue"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
 
         <!-- Sales Card -->
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-            <LinearLayout
-                android:layout_width="match_parent"
+            android:layout_marginStart="6dp"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/bg_card">
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:background="@android:color/white">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Sales"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="#5F6368" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="All time"
-                    android:textSize="10sp"
-                    android:textColor="#999999" />
-                <TextView
-                    android:id="@+id/tvSales"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 AED"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#2E7D32"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                android:text="SALES"
+                android:textSize="11sp"
+                android:letterSpacing="0.06"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All time"
+                android:textSize="10sp"
+                android:textColor="@color/text_tertiary"
+                android:layout_marginTop="1dp" />
+
+            <TextView
+                android:id="@+id/tvSales"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 AED"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:letterSpacing="-0.01"
+                android:textColor="@color/income_green"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Bank Balance Trend Chart -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bank Balance Trend"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="#202124"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="4dp" />
-
-    <androidx.cardview.widget.CardView
+    <!-- Balance Trend Card -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp">
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/bg_card"
+        android:layout_marginBottom="12dp">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp"
-            android:background="@android:color/white">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
-            <TextView
-                android:id="@+id/tvCurrentBalance"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Current Balance: 0 AED"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#202124"
-                android:layout_marginBottom="8dp" />
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-            <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/chartBalanceTrend"
-                android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:paddingHorizontal="8dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BALANCE TREND"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.06"
+                    android:textColor="@color/text_secondary" />
+
+                <TextView
+                    android:id="@+id/tvCurrentBalance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 AED"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.01"
+                    android:textColor="@color/text_primary"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
 
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chartBalanceTrend"
+            android:layout_width="match_parent"
+            android:layout_height="140dp" />
+    </LinearLayout>
+
+    <!-- Recent Transactions header -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Recent Transactions"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="#202124"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="12dp" />
+        android:text="RECENT TRANSACTIONS"
+        android:textSize="11sp"
+        android:letterSpacing="0.06"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="8dp" />
 
-    <androidx.cardview.widget.CardView
+    <!-- Transactions Card -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp">
+        android:orientation="vertical"
+        android:background="@drawable/bg_card">
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/white">
+            android:layout_height="match_parent">
 
             <ScrollView
                 android:id="@+id/scrollTransactions"
@@ -164,8 +173,7 @@
                     android:id="@+id/containerTransactions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="0dp" />
+                    android:orientation="vertical" />
             </ScrollView>
 
             <TextView
@@ -173,53 +181,49 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="No transactions yet."
-                android:textColor="#999999"
+                android:text="No transactions yet"
+                android:textColor="@color/text_tertiary"
+                android:textSize="15sp"
                 android:visibility="gone" />
         </FrameLayout>
-    </androidx.cardview.widget.CardView>
+    </LinearLayout>
 
-    <!-- Bottom Buttons -->
+    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginTop="24dp"
-        android:paddingBottom="16dp">
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="16dp">
 
         <TextView
             android:id="@+id/btnNewChat"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:text="New Chat"
-            android:textColor="#5F6368"
-            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:textSize="15sp"
             android:gravity="center"
-            android:padding="12dp"
             android:clickable="true"
             android:focusable="true"
             android:background="@drawable/bg_button_secondary" />
 
-        <View
-            android:layout_width="16dp"
-            android:layout_height="match_parent" />
+        <View android:layout_width="12dp" android:layout_height="1dp" />
 
         <TextView
             android:id="@+id/btnExportData"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:text="Export Data"
             android:textColor="@color/primary_blue"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:gravity="center"
-            android:padding="12dp"
             android:clickable="true"
             android:focusable="true"
             android:background="@drawable/bg_button_secondary" />
-
     </LinearLayout>
 
 </LinearLayout>

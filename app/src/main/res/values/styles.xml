@@ -1,32 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Your existing theme -->
-    </style>
-    
-    <!-- Rounded spinner style -->
+    <!-- Apple-style spinner: borderless, clean -->
     <style name="RoundedSpinner" parent="Widget.AppCompat.Spinner">
-        <item name="android:background">@drawable/bg_rounded_spinner</item>
-        <item name="android:padding">12dp</item>
+        <item name="android:background">@drawable/bg_input_field</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
     </style>
-    
-    <!-- Rounded dropdown popup style -->
+
     <style name="RoundedDropdownPopup" parent="Theme.AppCompat.Light">
         <item name="android:windowBackground">@drawable/bg_rounded_dropdown</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:listViewStyle">@style/RoundedListView</item>
     </style>
-    
+
     <style name="RoundedListView" parent="Widget.AppCompat.ListView">
         <item name="android:background">@drawable/bg_rounded_dropdown</item>
         <item name="android:divider">@null</item>
         <item name="android:dividerHeight">0dp</item>
     </style>
-    
+
+    <!-- Apple-style form field -->
     <style name="CustomEditText" parent="Widget.AppCompat.EditText">
-        <item name="android:background">@drawable/bg_rounded_spinner</item>
-        <item name="android:padding">12dp</item>
-        <item name="android:textColorHint">#BDBDBD</item>
+        <item name="android:background">@drawable/bg_input_field</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textColorHint">@color/text_placeholder</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">15sp</item>
     </style>
 </resources>

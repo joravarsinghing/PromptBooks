@@ -160,7 +160,7 @@ class DashboardFragment : Fragment() {
                 tvEmptyState.visibility = View.VISIBLE
                 tvNetProfit.text = "0 AED"
                 tvSales.text = "0 AED"
-                tvCurrentBalance.text = "Current Balance: 0 AED"
+                tvCurrentBalance.text = "0 AED"
                 containerTransactions.removeAllViews()
                 chartBalanceTrend.clear()
                 chartBalanceTrend.setNoDataText("No transactions to show")
@@ -199,7 +199,7 @@ class DashboardFragment : Fragment() {
             dayBalances[dateKey] = runningBalance
         }
 
-        tvCurrentBalance.text = String.format("Current Balance: %,.0f AED", runningBalance)
+        tvCurrentBalance.text = String.format("%,.0f AED", runningBalance)
 
         val sortedDates = dayBalances.keys.sorted()
         val last30Dates = if (sortedDates.size > 30) sortedDates.takeLast(30) else sortedDates
@@ -208,11 +208,20 @@ class DashboardFragment : Fragment() {
             Entry(index.toFloat(), dayBalances[date]?.toFloat() ?: 0f)
         }
 
+        val accentColor = ContextCompat.getColor(requireContext(), R.color.primary_blue)
+        val gradientFill = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                android.graphics.Color.argb(60, 52, 132, 169),
+                android.graphics.Color.argb(0, 52, 132, 169)
+            )
+        )
+
         val dataSet = LineDataSet(entries, "Balance").apply {
             mode = LineDataSet.Mode.CUBIC_BEZIER
             setDrawFilled(true)
-            fillColor = ContextCompat.getColor(requireContext(), R.color.primary_blue)
-            color = ContextCompat.getColor(requireContext(), R.color.primary_blue)
+            fillDrawable = gradientFill
+            color = accentColor
             lineWidth = 2f
             setDrawValues(false)
             setDrawCircles(false)
@@ -222,8 +231,9 @@ class DashboardFragment : Fragment() {
             data = LineData(dataSet)
             description.isEnabled = false
             legend.isEnabled = false
-            setExtraOffsets(5f, 5f, 5f, 5f)
-            
+            setExtraOffsets(0f, 8f, 0f, 0f)
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+
             xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM
                 val displayLabels = last30Dates.map { dateStr ->
@@ -238,14 +248,18 @@ class DashboardFragment : Fragment() {
                 setAvoidFirstLastClipping(true)
                 axisMinimum = -0.1f
                 axisMaximum = (entries.size - 1).toFloat() + 0.5f
+                textColor = ContextCompat.getColor(requireContext(), R.color.text_tertiary)
+                textSize = 10f
             }
-            
+
             axisLeft.apply {
                 setDrawGridLines(true)
                 gridColor = ContextCompat.getColor(requireContext(), R.color.divider_gray)
+                textColor = ContextCompat.getColor(requireContext(), R.color.text_tertiary)
+                textSize = 10f
             }
             axisRight.isEnabled = false
-            
+
             invalidate()
         }
     }
@@ -299,15 +313,16 @@ class DashboardFragment : Fragment() {
 
         val titleText = TextView(context).apply {
             text = record.description
-            textSize = 14f
+            textSize = 15f
             setTextColor(ContextCompat.getColor(context, R.color.text_primary))
-            setTypeface(null, Typeface.BOLD)
+            setTypeface(null, Typeface.NORMAL)
         }
 
         val dateText = TextView(context).apply {
             text = record.date
             textSize = 12f
             setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+            setPadding(0, 2, 0, 0)
         }
 
         infoLayout.addView(titleText)
@@ -315,12 +330,11 @@ class DashboardFragment : Fragment() {
 
         val amountText = TextView(context).apply {
             val displayAmount = if (record.amount < 0) -record.amount else record.amount
-            text = "${if (record.amount < 0) "+" else "-"}${formatNumber(displayAmount)} DHS"
-            textSize = 14f
+            text = "${if (record.amount < 0) "+" else "−"}${formatNumber(displayAmount)} AED"
+            textSize = 15f
             setTextColor(ContextCompat.getColor(context, if (record.amount < 0) R.color.income_green else R.color.expense_red))
             setTypeface(null, Typeface.BOLD)
             gravity = Gravity.END
-            setPadding(0, 0, 16, 0)
         }
 
         row.addView(indicator)
@@ -332,8 +346,8 @@ class DashboardFragment : Fragment() {
         val divider = View(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                (1 * density).toInt()
-            )
+                1
+            ).apply { marginStart = (52 * density).toInt() }
             setBackgroundColor(ContextCompat.getColor(context, R.color.divider_gray))
         }
         containerTransactions.addView(divider)

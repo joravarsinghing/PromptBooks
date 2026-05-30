@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\jvsin\\\\Documents\\\\GitHub\\\\PromptBooks\" -Force)",
-      "Bash(Select-Object Name, FullName)"
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(cd \"C:\\\\Users\\\\jvsin\\\\Documents\\\\GitHub\\\\PromptBooks\"; Get-ChildItem -Recurse -Directory | ForEach-Object { $_.FullName } | Select-Object -First 100)",
+      "PowerShell(sort *)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(where java *)",
+      "Bash(java -version)",
+      "Read(//c/Program Files/Android/Android Studio/jbr/**)",
+      "Read(//c/Program Files/Android/Android Studio/**)",
+      "Bash(git *)"
     ]
   }
 }
